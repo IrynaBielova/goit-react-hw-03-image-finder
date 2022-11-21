@@ -1,14 +1,14 @@
-import { Audio } from  'react-loader-spinner'
-// import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import { ColorRing } from  'react-loader-spinner'
 
 export const Loader = () => {
     return(
-<Audio
-    height = "80"
-    width = "80"
-    radius = "9"
-    color = 'green'
-    ariaLabel = 'Loading'     
-  />
-  )
+        <>
+            <ColorRing
+                height="30vh"
+                width="30vw"
+                ariaLabel="blocks-loading"
+                colors={['#3f51b5', '#fcd703', '#3f51b5', '#fcd703', '#3f51b5']}
+            />
+        </>
+    )
 }
