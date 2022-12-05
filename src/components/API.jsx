@@ -1,27 +1,14 @@
-import axios from 'axios';
+import axios from "axios";
 
-axios.defaults.baseURL = 'https://pixabay.com/api/';
-const API_KEY = "31262189-5622bc61388733923dd9d0c9f";
+const ENDPOINT = "https://pixabay.com/api/";
+const MY_KEY = "31262189-5622bc61388733923dd9d0c9f";
+const per_page = 12;
 
-export const FetchStartGallery = async(page) => {
-    const response = await axios.get(
-        `?page=${page}&key=${API_KEY}&orientation=horizontal&per_page=12`
-    );  
-    const responseData = await response.data;
-    if (!responseData.total) {
-        return Promise.reject(new Error(`No image with that name`));
-        ;
-    }
-    return responseData;   
-}
-
-export const FetchSearch = async(value, page) => {
-    const response = await axios.get(
-        `?q=${value}&page=${page}&key=${API_KEY}&orientation=horizontal&per_page=12`
-    );  
-    const responseData = await response.data;
-    if (!responseData.total) {
-        return Promise.reject(new Error(`No image with name ${value}`));
-    }
-    return responseData;   
+export default function SearchApi({ value, page }) {
+  return axios
+    .get(
+      `${ENDPOINT}?q=${value}&page=${page}&key=${MY_KEY}&image_type=photo&orientation=horizontal&per_page=${per_page}`
+    )
+    .then((response) => response.data)
+    .catch((error) => new Error(error));
 }

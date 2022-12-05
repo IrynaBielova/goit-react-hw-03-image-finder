@@ -1,10 +1,10 @@
-// import PropTypes from "prop-types";
+import PropTypes from "prop-types";
 import React, { Component } from "react";
+import styles from "../styles/styles.module.css";
 import Notiflix from "notiflix";
-import styles from '../styles/styles.css'
 
-export class Searchbar extends Component{
-    state = { value: "" };
+export class Searchbar extends Component {
+  state = { value: "" };
 
   handleSubmit = (e) => {
     const { value } = this.state;
@@ -23,27 +23,27 @@ export class Searchbar extends Component{
     this.setState({ value: e.target.value });
   };
 
-    render() {
-        return (
-          <header className={styles.Searchbar}>
-            <form onSubmit={this.handleSubmit} className={styles.SearchForm}>
-              <button type="submit" className={styles.SearchForm_button}>
-                <span className={styles.SearchForm_icon}></span>
-              </button>
-              <input
-                className={styles.SearchForm_input}
-                onChange={this.handleChangeValue}
-                type="text"
-                autoComplete="off"
-                autoFocus
-                placeholder="Search images and photos"
-              />
-            </form>
-          </header>
-        );
-      }
-    }
-    
-// Searchbar.propTypes = {
-//     onSubmit: PropTypes.func.isRequired,
-//   };
+  render() {
+    return (
+      <header className={styles.Searchbar}>
+        <form onSubmit={this.handleSubmit} className={styles.SearchForm}>
+          <button type="submit" className={styles.SearchForm_button}>
+            <span className={styles.SearchForm_icon}></span>
+          </button>
+          <input
+            className={styles.SearchForm_input}
+            onChange={this.handleChangeValue}
+            type="text"
+            autoComplete="off"
+            autoFocus
+            placeholder="Search images and photos"
+          />
+        </form>
+      </header>
+    );
+  }
+}
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};

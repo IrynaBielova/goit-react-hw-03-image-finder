@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import styles from '../styles/styles.css';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import styles from "../styles/styles.module.css";
 
-export class Modal extends Component {
+export default class Modal extends Component {
   componentDidMount() {
     window.addEventListener("keydown", this.props.onClose);
   }

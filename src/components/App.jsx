@@ -1,137 +1,93 @@
-import { Component } from 'react';
-import {API} from './API';
-import {Searchbar} from './Searchbar';
-import {ImageGallery} from './ImageGallery';
-import {ImageGalleryItem} from './ImageGalleryItem';
-import {Loader} from './Loader';
-import {Button} from './Button';
-import {Modal} from './Modal';
-import {FetchStartGallery, 
-  FetchSearch} from './API';
-import Notiflix from 'notiflix';
-
-
-const perPage = 12;
+import React, { Component } from "react";
+import Api from "./Api";
+import { Searchbar } from "./Searchbar";
+import { ImageGallery } from "./ImageGallery";
+import Loader from "./Loader";
+import { Button } from "./Button";
+import Modal from "./Modal";
+// import Notiflix from "notiflix";
 
 export class App extends Component {
   state = {
     images: [],
-    largeImageURL: '',
-    loading: false,
+    largeImage: null,
     page: 1,
-    value: '',
-    canShowMore: false,
+    value: "",
+    loading: false,
     showModal: false,
-  }
-
-  componentDidMount() {
-    FetchStartGallery(this.state.page)
-    .then(data => {
-      this.setState({
-        images: [ ...data.hits],
-      })
-      if(data.total > perPage){
-        this.setState({ canShowMore: true })
-      }
-    })
-    .catch();
-
-  }
+    error: null,
+  };
 
   componentDidUpdate(_, prevState) {
+    const { value, page } = this.state;
+    const options = { value, page };
 
-    const {images, value, page} = this.state;
-    
-    if(prevState.value !== value) {
-      this.setState({images: [], 
-        page: 1,
-        loading: true,
-      })
+    if (prevState.value !== value) {
+      this.setState(() => ({ loading: true, images: [], error: null }));
+
+      Api(options)
+        .then((images) => {
+          if (images.hits.length === 0) {
+            this.setState((error) => ({ error }));
+          }
+          this.setState({ images: images.hits });
+        })
+        .catch((error) => this.setState({ error }))
+        .finally(() => this.setState({ loading: false }));
     }
 
-    if(prevState.value !== value || prevState.page !== page){
-      
-      FetchSearch(value, page)
-      .then(data => {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...data.hits],
-          loading: false,
-        }));
+    if (prevState.page !== page && page !== 1) {
+      this.setState(() => ({ loading: true }));
 
-        if(data.total > perPage){
-          this.setState({ canShowMore: true })
-        } else if(data.total - images.length <= perPage){
-          this.setState({ canShowMore: false })
-        }
-        
-      })
-      .catch(this.onApiError);
-
+      Api(options)
+        .then((images) =>
+          this.setState({
+            images: [...prevState.images, ...images.hits],
+          })
+        )
+        .finally(() => this.setState({ loading: false }));
     }
   }
 
-  onApiError = () => {
-    Notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
-    this.setState({ loading: false, canShowMore: false });
-  };
-
-  handleFormSubmit = value => {
-    if(!this.state.showModal){
-    this.setState({ value })
-    }
-    return  
-  }
-
-  showMore = () => {
-    this.setState(prevState => ({ page: prevState.page +1 }))
-  }
-
-  canShowMore = () => {
-    const {images} = this.state
-    if(images.total > perPage){
-      this.setState({ canShowMore: true })
-    } else if(images.total <= images.length + perPage){
-      this.setState({ canShowMore: false })
-      Notiflix.Notify.info(`We're sorry, but you've reached the end of search results.`)
-    }
-  }
+  handleSubmit = (value) =>
+    this.setState({
+      value,
+      page: 1,
+    });
 
   toggleModal = () => {
-    this.setState(({showModal}) => ({
-      showModal: !showModal,
-    }))
-  }
-
-  onImageClick = (largeImageURL) => {
-    this.setState({ largeImageURL });
-    this.toggleModal();
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
   };
 
+  onClose = (e) => {
+    if (e.target === e.currentTarget || e.code === "Escape") {
+      this.toggleModal();
+    }
+  };
+
+  handleClickImage = (largeImage) => {
+    this.toggleModal();
+    this.setState({ largeImage });
+  };
+
+  handleLoadMore = () => {
+    this.setState((prevState) => ({ page: prevState.page + 1 }));
+  };
 
   render() {
-    const { images, value, loading, canShowMore, showModal, largeImageURL } = this.state;
-
-    return(
-      <>
-        <Searchbar onSubmit={this.handleFormSubmit}/>
-
-        <ImageGallery 
-          images={images}
-          value={value}
-          onClick={this.onImageClick}
-        />
-
+    const { images, loading, showModal, largeImage } = this.state;
+    return (
+      <div>
+        <Searchbar onSubmit={this.handleSubmit} />
+        {images && (
+          <ImageGallery images={images} largeImage={this.handleClickImage} />
+        )}
         {loading && <Loader />}
-
-        {canShowMore && <Button onShowMore={this.showMore}/>}
-
-        {showModal && <Modal 
-          onClose={this.toggleModal}
-          largeImageURL={largeImageURL}
-        />}
-      </>
-    )
+        {images.length !== 0 &&
+          (loading ? <Loader /> : <Button onClick={this.handleLoadMore} />)}
+        {showModal && <Modal onClose={this.onClose}>{largeImage}</Modal>}
+      </div>
+    );
   }
 }
+
